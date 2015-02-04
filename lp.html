@@ -1,0 +1,523 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<!--
+
+	Hello and welcome to the JavaScript Yugioh Life Point Calculator. My nickname is amcsi and I made it.
+	This "program" is written in JavaScript, meaning it is to be launched in your browser. Modern mobile phones now have browsers, which means that you can put this file on your mobile phone and open it with its browser to launch it. Unfortunately it won't work properly for all browsers, but check out the project's website at https://sourceforge.net/projects/jsylpc to find information on how to configure this program for your phone in case it would work, but not with the default settings.
+	You can find the settings a bit lower on this page, to edit.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+  <script type="text/javascript">
+<!--
+  	/*
+	*
+	*
+	*	SETTINGS:
+	*
+	*
+  	*/
+  var startlp = 8000; // Initial life points. Deafult: 8000
+  var numpad = 0; // Change to 1 to show a clickable numpad on the page. WARNING: keep it at 0, because it doesn't work yet!
+  var inputTextEnable = 0; // Change to 1 to enable the text input field. Normally it doesn't have to be on, because the program doesn't need you to be actually editing the text field. The text field is normally there just to show you what number has been typed. This shouldn't be set to 1 if numbers is set to 1. Default: 0
+
+	// With the following variables, you set what character code your phone treats the * and # buttons. This is important to set up. The defaults are made to work with Sony Ericsson k800. By setting keyTest to 1, you can find out what character code your phone treats your buttons.
+  var starCode = 42; // Default: 42
+  var sharpCode = 35; // Default: 32
+  var keyTest = 0; // By setting this to 1, this program won't act as a life point calculator, but instead display a message with a character code for the button you pressed. The * and # buttons are what is important. So what you do is, you set this to 1, load this page in your browser, press #, write down the number it tells you, then press *, write down the number it tells you, then exit, edit the (this) file, change the starCode and sharpCode variables according to what you wrote down, and set this variable back to 0. Default: 0
+  
+  
+  
+  var noOfPlayers = 2;
+  lArr = Array(noOfPlayers);
+  for (var i=0;i<noOfPlayers;i++) {
+    lArr[i] = [];
+    lArr[i][0] = [startlp,"&nbsp;",-1];
+  }
+  
+  var numberFocus = [];
+  var unFocused = [];
+  for (var i = 0; i < noOfPlayers; i++) {
+    numberFocus[i] = 0;
+    unFocused[i] = 0;
+  }
+  
+  function numpadHide() {
+    for (var i =0 ; i < noOfPlayers; i++) {
+        if (numpad == 0) {
+            document.getElementById("numpad" + i).style.display="none";
+        }
+        if (inputTextEnable == 0) {
+            document.getElementById("pc_" + i).readOnly=true;
+        }
+    }
+    
+    return true;
+  } 
+  
+  function changeColor() {
+	var lp;
+    for (var i = 0; i < noOfPlayers; i++) {
+		lp = document.getElementById("lp_" + i).innerHTML;
+        var newColor = whichColor(lp);
+        newColor += "";
+        document.getElementById("lp_" + i).style.backgroundColor=newColor;
+		document.getElementById("lp_" + i).style.color = (lp > 0) ? "black" : "#777";
+    }
+    
+    
+  }
+  function whichColor(lp) {
+    if (lp <= 0) {
+		return "black";
+	}
+	else {
+		if(lp > startlp) {
+			return "blue";
+		}
+		else {
+			var green;
+			var red;
+			if (lp == startlp / 2) {
+				green = 255;
+				red = 255;
+			} else if (lp > startlp / 2) {
+				green = 255;
+				red = Math.round((startlp - lp) / (startlp / 2) * 255);
+			} else if (lp > 0 && lp < startlp / 2) {
+				red = 255;
+				green = Math.round(lp / (startlp / 2) * 255);
+			} else {
+				return "rgb(100,100,100)";
+			}
+			
+			return "rgb(" + red + "," + green + ",0)";
+		}
+	}
+  }
+  function change(which, what) {
+    var howMuch = parseInt(document.getElementById("pc_" + which).value);
+    var oldLp=parseInt(document.getElementById("lp_" + which).innerHTML);
+    var newLp;
+    switch (what) {
+        case 0:
+            newLp = oldLp - howMuch;
+            lArr[which].push( new Array(newLp, howMuch, what) );
+            break;
+        case 1:
+            newLp = oldLp + howMuch;
+            lArr[which].push( new Array(newLp, howMuch, what) );
+            break;
+        case 2:
+            newLp = Math.round(oldLp / 2);
+            lArr[which].push( new Array(newLp, 2, what) );
+            break;
+        case 3:
+            newLp = howMuch;
+            lArr[which].push( new Array(newLp, howMuch, what) );
+            break;
+    }
+    document.getElementById("lp_" + which).innerHTML = newLp;
+    changeColor();
+    //writeTable();
+    writeDivs();
+  }
+  
+  function focusOn(player) {
+    numberFocus[player] = 1;
+  }
+  
+  function focusOff(player) {
+    numberFocus[player] = 0;
+    unFocused[player] = 1;
+  }
+  
+  function reFocus(player) {
+    unFocused[player] = 1;
+  }
+  
+  function undo (player, to) {
+    lArr[player].splice(to + 1, lArr[player].length-(to + 1));
+    changelp(player, lArr[player][to][0]);
+  }
+
+  function writeDivs() {
+    var toPut = "";
+    for (var i = 0; i < noOfPlayers; i++) {
+        toPut = "<table style='width:100%;color:white'>";
+        for (var j = lArr[i].length - 1; j >= 0 && lArr[i].length > 1; j--) {
+            //alert ("begin j="+j);
+            toPut += "<tr>";
+            
+            toPut += "<td style='text-align:left'>";
+            
+            if (lArr[i].length -1 != j) {
+ 	           toPut += "<a href='javascript:undo(" + i + "," + j + ")'>" + lArr[i][j][0] + "</a>";
+            } else {
+                toPut += "&nbsp;";
+            }
+            
+            toPut += "</td>";
+            toPut += "<td style='text-align:right;color:#fbb;'>";
+            switch (lArr[i][j][2]) {
+                case -1: break;
+                case 0:
+                    toPut += '- ';
+                    break;
+                case 1:
+                    toPut += "+ ";
+                    break;
+                case 2:
+                    toPut += "÷ ";
+                    break;
+                case 3: 
+                    toPut += "-> ";
+                    break;
+                    
+            }
+            
+            toPut+=lArr[i][j][1];
+            
+            toPut += "</td>";
+            toPut += "</tr>\n";
+            //alert(j);
+        }
+        toPut += "</table>\n";
+        //alert(toPut); 
+        document.getElementById("soFar_"+i).innerHTML = toPut;
+    }
+    
+    return;
+  }
+  function num(player, num) {
+    
+    var newLp=document.getElementById("pc_" + player).value;
+    if (unFocused[player] == 1) {
+        newLp = "";
+        unFocused[player] = 0;
+    }
+    if (newLp == "0") {
+        if (num < 1) {
+            return;
+        } else {
+            newLp = "";
+        }
+    } 
+    switch (num) {
+        case -2:
+            newLp = "0"; break;
+        case -1: 
+            newLp += "";
+            newLp = newLp.substring(0, newLp.length - 1); break;
+        default:
+            newLp = "" + newLp + num; break;
+        
+    }
+    document.getElementById("pc_" + player).value = newLp;
+    return;
+  }
+  
+  function keyPress(player, e) {
+    if(numberFocus[player] == 0) {
+        return;
+    }
+    var keynum;
+    
+    if(window.event) { //IE
+        keynum = window.event.keyCode;
+    }
+    else if(e.which) { // Netscape/Firefox/Opera
+        keynum = e.which;
+    }
+    //alert(keynum);
+    if (keyTest != 0) {
+        alert("A gomb kódja: " + keynum);
+    } else {
+        if(keynum >= 48 && keynum <= 57) {
+            num(player, keynum - 48);
+        } else if (keynum == starCode) {
+            num(player, -1);
+        } else if (keynum == sharpCode) {
+            num(player, -2);
+        }
+    }
+    return;
+  }
+  
+  function changelp(player, howMuch) {
+    document.getElementById("lp_" + player).innerHTML=howMuch;
+    changeColor()
+    writeDivs();
+  }
+	function resetlp() {
+		changelp(0, startlp);
+		changelp(1, startlp);
+	}
+
+  -->
+  </script>
+  <title>yLPC (yugioh Life Point Calculator) v0.4</title>
+  <style type="text/css">
+<!--
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+margin: 0;
+padding: 0;
+border: 0;
+outline: 0;
+vertical-align: baseline;
+background: transparent;
+}
+:focus {
+outline: 0;
+}
+.hidden {
+    display:none;
+}
+.active {
+    display:block;
+}
+ins {
+text-decoration: none;
+}
+del {
+text-decoration: line-through;
+}
+/* tables still need 'cellspacing="0"' in the markup */
+
+  body {
+    background-color:black;
+  }
+  #page {
+	width:232px;
+	overflow:auto;
+    text-align:center;
+    /*border:1px solid black;*/
+  }
+  #lifediv {
+    text-align:center;
+    
+  }
+  #lifetable td {
+    border:1px solid black;
+    font-size:32px;
+    background-color:black;
+    width:110px;
+    text-align:center;
+  }
+  .text input {
+    /*
+    background-color:transparent;
+    color:white;
+    */
+    width:50px;
+    
+    text-align:right;
+    border: 1px solid #cccccc;
+  }
+
+/*
+	
+  .button input, .button td {
+    background-color:#222222;
+    border:1px solid #555555;
+    color:white;
+    width:20px;
+    height:20px;
+    padding:1px;
+  }	
+*/
+  a {
+    text-decoration:none;
+    font-weight:bold;
+    color:white;
+  }
+  a:hover {
+    color:lightblue;
+  }
+  /*.center {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+  }*/
+	table.lifetable tr td {
+		background-color:green;
+		color:black;
+	}
+	.numAndOps {
+		width:100px;
+	}
+	.operations a {
+		display:block;
+		width:25px;
+		text-align:center;
+		color:#ff9;
+	}
+	.operations {
+		clear:both;
+	}
+	.numpad a {
+		display:block;
+		width:25px;
+		text-align:center;
+		color:#dfd;
+	}
+	.nao_0 .operations a {
+		float:right;
+	}
+	.nao_1 .operations a {
+		float:left;
+	}
+	.operations a:hover {
+		color:lightblue;
+	}
+	.text {
+		text-align:center;
+	}
+	.text input {
+		text-align:center;
+	}
+	table.numOpsChanges {
+		width:100%;
+	}
+	#numpad0 {
+		float:right;
+		clear:both;
+	}
+-->
+  </style>
+  
+  
+  
+  
+  
+  
+  </head>
+  <body onload='numpadHide(); changeColor(); resetlp()'>
+    <div id='page'>
+        <div id='lifediv'>
+        <table id='lifetable'>
+            <tr>
+                <td class="lp" id="lp_0"></td>
+                <td class="lp" id="lp_1"></td>
+            </tr>
+        </table>
+        </div>
+        <div id='change'>
+            <table class="numOpsChanges">
+                <tr class="numAndOps">
+                    <td class="nao_0">
+                        <form id='youChange' method="post">
+                            <div class='text'>
+                            	<input type='text' onfocus='focusOn(0)' onblur='focusOff(0)' onkeypress="keyPress(0,event)" name='number' id='pc_0' value='0' class='center'>
+                            </div>
+                            <div class='button'>
+								<table class='numpad' id='numpad0'>
+									<tr>
+										<td><a href="javascript:num(0,1)">1</a></td>
+										<td><a href="javascript:num(0,2)">2</a></td>
+										<td><a href="javascript:num(0,3)">3</a></td>
+									</tr>
+									<tr>
+										<td><a href="javascript:num(0,4)">4</a></td>
+										<td><a href="javascript:num(0,5)">5</a></td>
+										<td><a href="javascript:num(0,6)">6</a></td>
+									</tr>
+									<tr>
+										<td><a href="javascript:num(0,7)">7</a></td>
+										<td><a href="javascript:num(0,8)">8</a></td>
+										<td><a href="javascript:num(0,9)">9</a></td>
+									</tr>
+									<tr>
+										<td><a href="javascript:num(0,-1)">C</a></td>
+										<td><a href="javascript:num(0,0)">0</a></td>
+										<td><a href="javascript:num(0,-2)">X</a></td>
+									</tr>
+								</table>
+								<div class="operations">
+									<a onfocus='focusOn(0)' onblur='focusOff(0)' onkeypress="keyPress(0,event)" href="javascript:change(0,0);reFocus(0);">-</a>
+									<a onfocus='focusOn(0)' onblur='focusOff(0)' onkeypress="keyPress(0,event)" href="javascript:change(0,1);reFocus(0);">+</a>
+									<a onfocus='focusOn(0)' onblur='focusOff(0)' onkeypress="keyPress(0,event)" href="javascript:change(0,2);reFocus(0);">/2</a>
+									<a onfocus='focusOn(0)' onblur='focusOff(0)' onkeypress="keyPress(0,event)" href="javascript:change(0,3);reFocus(0);">lp</a>
+								</div>
+                            </div>
+                        </form>
+                    </td>
+                    <td class="nao_1">
+                        <form id='oppChange'>
+                        <div class='text'>
+                            <input type='text' onfocus='focusOn(1)' onblur='focusOff(1)' onkeypress="keyPress(1,event)"  name='number' id='pc_1' value='0' class='center'>
+                        </div>
+                        <div class='button'>
+                            <table class='numpad' id='numpad1'>
+									<tr>
+										<td><a href="javascript:num(1,1)">1</a></td>
+										<td><a href="javascript:num(1,2)">2</a></td>
+										<td><a href="javascript:num(1,3)">3</a></td>
+									</tr>
+									<tr>
+										<td><a href="javascript:num(1,4)">4</a></td>
+										<td><a href="javascript:num(1,5)">5</a></td>
+										<td><a href="javascript:num(1,6)">6</a></td>
+									</tr>
+									<tr>
+										<td><a href="javascript:num(1,7)">7</a></td>
+										<td><a href="javascript:num(1,8)">8</a></td>
+										<td><a href="javascript:num(1,9)">9</a></td>
+									</tr>
+									<tr>
+										<td><a href="javascript:num(1,-1)">C</a></td>
+										<td><a href="javascript:num(1,0)">0</a></td>
+										<td><a href="javascript:num(1,-2)">X</a></td>
+									</tr>
+                            </table>
+								<div class="operations">
+									<a onfocus='focusOn(1)' onblur='focusOff(1)' onkeypress="keyPress(1,event)" href="javascript:change(1,0);reFocus(1);">-</a>
+									<a onfocus='focusOn(1)' onblur='focusOff(1)' onkeypress="keyPress(1,event)" href="javascript:change(1,1);reFocus(1);">+</a>
+									<a onfocus='focusOn(1)' onblur='focusOff(1)' onkeypress="keyPress(1,event)" href="javascript:change(1,2);reFocus(1);">/2</a>
+									<a onfocus='focusOn(1)' onblur='focusOff(1)' onkeypress="keyPress(1,event)" href="javascript:change(1,3);reFocus(1);">lp</a>
+								</div>
+                        </div>
+                        </form>
+                    </td>
+                </tr>
+                <tr style='color:white'>
+                    <td style='vertical-align:top'><div id='soFar_0'></div></td>
+                    <td style='vertical-align:top'><div id='soFar_1'></div></td>
+                </tr>
+            </table>
+        </div>
+        <div id='soFar'>
+            <table>
+                <tr> 
+                    <td id='soFarA_0'>&nbsp;</td>
+                    <td id='soFarB_0'>&nbsp;</td>
+                    <td id='soFarA_1'>&nbsp;</td>
+                    <td id='soFarB_1'>&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+  </body>
+</html>
