@@ -1,0 +1,13 @@
+
+
+function IncDec(plusminus) {
+
+alert("lol");
+
+plusminus = parseInt (plusminus);
+
+currentScore  = parseInt(document.getElementById("score").innerHTML) + plusminus;
+document.getElementById("score").innerHTML = currentScore;
+
+
+  }
