@@ -1,5 +1,4 @@
 
-<script type="text/javascript">
 
 
 function IncDecRed(plusminus) {
@@ -28,7 +27,3 @@ document.getElementById("scorered").innerHTML = 0;
 document.getElementById("scoreblue").innerHTML = 0; 	
  	
  }
-  
-  
-
-</script>
