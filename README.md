@@ -1,14 +1,1 @@
-# VEX-Skyrise-Counter
-
-
-JavaScript Counter + using ionic framework interface 
-
-  main code = index.html
-- script file directory = ""
-
-#######################################################
-This file is only for my learning purpose and I'm sharing it.
-This codes may not look like a PROgrammer codes. 
-Tell me if I'm doing it wrong. I'll appreciate it.
-Thanks :D
-
+<h1 class="code-line" data-line-start=0 data-line-end=1 ><a id="VEXSkyriseCounter_0"></a>VEX-Skyrise-Counter</h1> <p class="has-line-data" data-line-start="3" data-line-end="4">JavaScript Counter + using ionic framework interface</p> <p class="has-line-data" data-line-start="5" data-line-end="6">main code = index.html</p> <ul> <li class="has-line-data" data-line-start="6" data-line-end="8">script file directory = “”</li> </ul> <p class="has-line-data" data-line-start="8" data-line-end="13">=================================================<br> This file is only for my learning purpose and I’m sharing it.<br> This codes may not look like a PROgrammer codes.<br> Tell me if I’m doing it wrong. I appreciate it.<br> Thanks :D</p>
