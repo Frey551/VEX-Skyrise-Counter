@@ -1,6 +1,4 @@
 
-
-
 function IncDecRed(plusminus) {
 
 plusminus = parseInt (plusminus);
@@ -11,7 +9,8 @@ document.getElementById("scorered").innerHTML = currentScore;
 
   }
   
- function IncDecBlue(plusminus) {
+  
+function IncDecBlue(plusminus) {
 
 plusminus = parseInt (plusminus);
 
