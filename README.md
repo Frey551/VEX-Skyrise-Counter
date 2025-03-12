@@ -6,6 +6,6 @@
 
 
 
-=================================================<br> Yes, it contains unused files.
-This file is only for my learning purpose and I’m sharing it. <br> 
-<br> Thanks :D</p>
+=================================================<br> It contains some unused files.
+This is for my learning purposes. <br> 
+<br> Thanks</p>
